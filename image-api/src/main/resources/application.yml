@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: demo
+  datasource:
+    url: jdbc:postgresql://localhost:15431/postgres
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database: postgresql
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+
+minio:
+  url: http://localhost:9000
+  port: 9000
+  accessKey: user
+  secretKey: password
+  secure: false
+  bucket: minio-storage
+  image-size: 10485760
+
+server:
+  port: 8080
+
+token:
+  signing:
+    key: 53A73E5F1C4E0A2D3B5F2D784E6A1B423D6F247D1F6E5C3A596D635A75327855
+
+
