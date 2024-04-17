@@ -10,6 +10,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Image model.
+ */
 @Data
 @Entity
 @NoArgsConstructor
@@ -17,12 +20,21 @@ import lombok.NoArgsConstructor;
 @Table(name = "images")
 public class Image {
 
+    /**
+     * Create image.
+     *
+     * @param name image name.
+     * @param size image size.
+     * @param userId user id.
+     * @param fileId image id in storage.
+     */
     public Image(String name, Long size, Long userId, String fileId) {
         this.name = name;
         this.size = size;
         this.fileId = fileId;
         this.userId = userId;
     }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

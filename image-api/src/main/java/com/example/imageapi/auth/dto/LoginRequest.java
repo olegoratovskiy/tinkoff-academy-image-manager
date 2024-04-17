@@ -1,8 +1,15 @@
 package com.example.imageapi.auth.dto;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+/**
+ * DTO for user login.
+ */
+@Setter
+@Getter
+@AllArgsConstructor
 public class LoginRequest {
     private String username;
     private String password;

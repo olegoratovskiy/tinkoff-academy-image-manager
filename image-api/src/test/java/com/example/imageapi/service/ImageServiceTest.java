@@ -1,5 +1,11 @@
 package com.example.imageapi.service;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.example.imageapi.auth.User;
 import com.example.imageapi.auth.UserRepository;
 import com.example.imageapi.auth.UserService;
@@ -13,6 +19,7 @@ import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.RemoveBucketArgs;
 import io.minio.RemoveObjectArgs;
+import java.util.List;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,14 +38,6 @@ import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @Testcontainers
@@ -95,13 +94,13 @@ class ImageServiceTest {
     @BeforeEach
     @SneakyThrows
     void init() {
-        initUser = userService.create(User.builder()
-                .username("user")
-                .email("email")
-                .password("password")
-                .role(User.Role.ROLE_USER)
-                .build()
-        );
+        var user = new User();
+        user.setUsername("user");
+        user.setEmail("email");
+        user.setPassword("password");
+        user.setRole(User.Role.ROLE_USER);
+
+        initUser = userService.create(user);
         minioClient.makeBucket(MakeBucketArgs.builder().bucket("minio-storage").build());
     }
 
@@ -133,6 +132,8 @@ class ImageServiceTest {
         assertEquals(2, images.size());
         assertEquals("name1", images.get(0).getName());
         assertEquals("name2", images.get(1).getName());
+        assertEquals(userService.getCurrentUser(), initUser);
+        assertEquals(userService.getCurrentUser().hashCode(), initUser.hashCode());
     }
 
     @Test

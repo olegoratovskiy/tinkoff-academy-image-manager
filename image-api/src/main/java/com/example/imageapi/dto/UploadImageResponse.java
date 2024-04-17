@@ -1,8 +1,15 @@
 package com.example.imageapi.dto;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Value
+/**
+ * DTO for upload image result.
+ */
+@Getter
+@Setter
+@AllArgsConstructor
 public class UploadImageResponse {
     String imageId;
 }

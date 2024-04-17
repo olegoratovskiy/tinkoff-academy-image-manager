@@ -1,8 +1,15 @@
 package com.example.imageapi.auth.dto;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+/**
+ * DTO for user registration.
+ */
+@Setter
+@Getter
+@AllArgsConstructor
 public class RegisterRequest {
     private String username;
     private String email;

@@ -1,13 +1,17 @@
 package com.example.imageapi.dto;
 
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.Value;
 
-import java.io.Serializable;
-
 /**
- * DTO for {@link com.example.imageapi.domain.Image}
+ * DTO for {@link com.example.imageapi.domain.Image}.
  */
-@Value
+@Getter
+@Setter
+@AllArgsConstructor
 public class ImageResponse implements Serializable {
     String filename;
     Long size;
