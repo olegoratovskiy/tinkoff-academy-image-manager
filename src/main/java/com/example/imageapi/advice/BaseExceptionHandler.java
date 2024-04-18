@@ -4,6 +4,7 @@ import com.example.imageapi.dto.UiSuccessContainer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,6 +18,12 @@ public class BaseExceptionHandler {
     @ExceptionHandler({ResponseStatusException.class})
     public ResponseEntity<UiSuccessContainer> statusException(ResponseStatusException ex) {
         return ResponseEntity.status(ex.getStatusCode())
+            .body(new UiSuccessContainer(false, ex.getMessage()));
+    }
+
+    @ExceptionHandler({UsernameNotFoundException.class})
+    public ResponseEntity<UiSuccessContainer> userNotFound(UsernameNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
             .body(new UiSuccessContainer(false, ex.getMessage()));
     }
 
