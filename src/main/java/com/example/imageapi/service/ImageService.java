@@ -91,7 +91,7 @@ public class ImageService {
         imageRepository.deleteByFileId(imageId);
     }
 
-    private void validateImageAccess(String imageId) {
+    public void validateImageAccess(String imageId) {
         Optional<Image> image = imageRepository.findImageByFileId(imageId);
 
         if (image.isEmpty()) {
