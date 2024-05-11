@@ -7,8 +7,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 /**
  * Image filter request model.
@@ -17,6 +19,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Accessors(chain = true)
 @Table(name = "image_filter_request")
 public class ImageFilterRequest {
 
@@ -33,10 +36,11 @@ public class ImageFilterRequest {
     private String modifiedImageId;
 
     /**
+     * ImageFilterRequest constructor.
      *
-     * @param requestId request id
-     * @param status status
-     * @param originalImageId original image id
+     * @param requestId request id.
+     * @param status status.
+     * @param originalImageId id of image.
      */
     public ImageFilterRequest(String requestId, ImageFilterStatus status, String originalImageId) {
         this.requestId = requestId;

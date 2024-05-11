@@ -12,4 +12,6 @@ import org.springframework.stereotype.Repository;
 public interface ImageFilterRequestRepository extends JpaRepository<ImageFilterRequest, Integer> {
 
     Optional<ImageFilterRequest> findByRequestId(String requestId);
+
+    Boolean existsByRequestId(String requestId);
 }

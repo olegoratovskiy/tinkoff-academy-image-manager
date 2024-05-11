@@ -7,9 +7,9 @@ import com.example.imageapi.dto.GetImagesResponse;
 import com.example.imageapi.dto.GetModifiedImageByRequestIdResponse;
 import com.example.imageapi.dto.UiSuccessContainer;
 import com.example.imageapi.dto.UploadImageResponse;
+import com.example.imageapi.service.ImageService;
 import com.example.imageapi.service.filter.ImageFilter;
 import com.example.imageapi.service.filter.ImageFiltersService;
-import com.example.imageapi.service.ImageService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -60,9 +60,9 @@ public class ImageResource {
     @PostMapping(value = "/image/{imageId}/filters/apply")
     public ApplyImageFiltersResponse applyImageFilters(
         @PathVariable String imageId,
-        @RequestParam List<ImageFilter> imageFilters
+        @RequestParam List<ImageFilter> filters
     ) {
-        return new ApplyImageFiltersResponse(filtersService.applyImageFilters(imageId, imageFilters));
+        return new ApplyImageFiltersResponse(filtersService.applyImageFilters(imageId, filters));
     }
 
     @PostMapping(value = "/image/{imageId}/filters/{requestId}")

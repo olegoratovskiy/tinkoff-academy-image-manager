@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.imageapi.auth.JwtAuthenticationFilter;
 import com.example.imageapi.domain.Image;
 import com.example.imageapi.domain.ImageMapperImpl;
+import com.example.imageapi.dto.ApplyImageFiltersResponse;
 import com.example.imageapi.dto.GetImagesResponse;
 import com.example.imageapi.dto.ImageResponse;
 import com.example.imageapi.dto.UiSuccessContainer;
@@ -20,6 +21,7 @@ import com.example.imageapi.exception.ImageNotAvailableException;
 import com.example.imageapi.exception.ImageNotFoundException;
 import com.example.imageapi.exception.ImageValidationException;
 import com.example.imageapi.service.ImageService;
+import com.example.imageapi.service.filter.ImageFiltersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import lombok.SneakyThrows;
@@ -41,6 +43,8 @@ class ImageResourceTest {
 
     @MockBean
     private ImageService mockImageService;
+    @MockBean
+    private ImageFiltersService mockImageFiltersService;
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -137,5 +141,17 @@ class ImageResourceTest {
                                 ))
                         )
                 ));
+    }
+
+    @Test
+    @SneakyThrows
+    void applyFilters() {
+        when(mockImageFiltersService.applyImageFilters(any(), any())).thenReturn("request-id");
+        mockMvc.perform(post("/api/v1/image/image-id/filters/apply")
+                .param("filters", "GRAYSCALE"))
+            .andDo(print()).andExpect(status().isOk())
+            .andExpect(content().json(
+                new ObjectMapper().writeValueAsString(new ApplyImageFiltersResponse("request-id"))
+            ));
     }
 }

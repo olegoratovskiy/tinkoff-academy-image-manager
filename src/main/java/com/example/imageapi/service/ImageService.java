@@ -91,6 +91,11 @@ public class ImageService {
         imageRepository.deleteByFileId(imageId);
     }
 
+    /**
+     * Validate that current user has access to this image.
+     *
+     * @param imageId id of the image.
+     */
     public void validateImageAccess(String imageId) {
         Optional<Image> image = imageRepository.findImageByFileId(imageId);
 
