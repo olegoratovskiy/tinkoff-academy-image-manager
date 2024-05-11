@@ -13,7 +13,10 @@ import com.example.imageapi.domain.Image;
 import com.example.imageapi.exception.ImageNotAvailableException;
 import com.example.imageapi.exception.ImageNotFoundException;
 import com.example.imageapi.exception.ImageValidationException;
+import com.example.imageapi.repository.ImageFilterRequestRepository;
 import com.example.imageapi.repository.ImageRepository;
+import com.example.imageapi.service.filter.ImageFilterStatus;
+import com.example.imageapi.service.filter.ImageFiltersService;
 import io.minio.ListObjectsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
@@ -21,6 +24,7 @@ import io.minio.RemoveBucketArgs;
 import io.minio.RemoveObjectArgs;
 import java.util.List;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,13 +36,18 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.stereotype.Component;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.multipart.MultipartFile;
+import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
+@Slf4j
 @SpringBootTest
 @Testcontainers
 @ContextConfiguration(initializers = {ImageServiceTest.Initializer.class})
@@ -56,11 +65,18 @@ class ImageServiceTest {
             .withUserName("user")
             .withPassword("password");
 
+    @Container
+    public static KafkaContainer kafkaContainer =
+        new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.2.2"))
+            .withLogConsumer(new Slf4jLogConsumer(log));
+
 
     static {
         minIOContainer.setPortBindings(List.of("9000:9000"));
+        kafkaContainer.setPortBindings(List.of("9093:9093", "29093:29093"));
     }
 
+    @Component
     static class Initializer
             implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
@@ -73,7 +89,11 @@ class ImageServiceTest {
                     "minio.secretKey=" + minIOContainer.getPassword(),
                     "minio.port=9000",
                     "minio.secure=false",
-                    "minio.bucket=minio-storage"
+                    "minio.bucket=minio-storage",
+                    "spring.kafka.listener.ack-mode=manual",
+                    "spring.kafka.cloud.zookeeper.config.enabled=false",
+                    "spring.kafka.cloud.zookeeper.connect-string=localhost:2181",
+                    "spring.kafka.bootstrap_servers="+kafkaContainer.getBootstrapServers()
             ).applyTo(configurableApplicationContext.getEnvironment());
         }
     }
@@ -81,11 +101,15 @@ class ImageServiceTest {
     @Autowired
     private ImageService imageService;
     @Autowired
+    private ImageFiltersService imageFiltersService;
+    @Autowired
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private ImageRepository imageRepository;
+    @Autowired
+    private ImageFilterRequestRepository imageFilterRequestRepository;
     @Autowired
     private MinioClient minioClient;
 
@@ -200,6 +224,21 @@ class ImageServiceTest {
     @WithMockUser(username = "user")
     void deleteImageNotFound() {
         assertThrows(ImageNotFoundException.class, () -> imageService.deleteImage("test"));
+    }
+
+    @Test
+    @SneakyThrows
+    @WithMockUser(username = "user")
+    void applyFilters() {
+        var testFile = createTestImage("name1");
+        var image = imageService.uploadImage(testFile);
+
+        var requestId = imageFiltersService.applyImageFilters(image.getFileId(), List.of());
+        var response = imageFiltersService.getApplyingImageFiltersStatus(image.getFileId(), requestId);
+
+        assertTrue(imageFilterRequestRepository.existsByRequestId(requestId));
+        assertEquals(ImageFilterStatus.WIP, response.getStatus());
+        assertEquals(image.getFileId(), response.getImageId());
     }
 
     private MultipartFile createTestImage(String fileContent, String name, String mediaType) {
