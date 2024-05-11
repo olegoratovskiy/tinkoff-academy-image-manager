@@ -67,7 +67,7 @@ class ImageServiceTest {
 
     @Container
     public static KafkaContainer kafkaContainer =
-        new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.2.2.arm64"))
+        new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.2.2"))
             .withLogConsumer(new Slf4jLogConsumer(log));
 
 
