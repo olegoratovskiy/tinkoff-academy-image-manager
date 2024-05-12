@@ -1,7 +1,8 @@
-package com.example.imageapi.kafka;
+package com.example.imageapi.messagebus.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -9,6 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@NoArgsConstructor
 @AllArgsConstructor
 public class ImagesDoneMessage {
     /**

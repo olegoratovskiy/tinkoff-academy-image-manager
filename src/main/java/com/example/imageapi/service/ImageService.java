@@ -68,7 +68,7 @@ public class ImageService {
                 "Provided file is too big or has not supported type.");
         }
 
-        String fileId = minioService.uploadImage(file);
+        String fileId = minioService.uploadImage(file.getBytes());
 
         String fileName = file.getOriginalFilename();
         Long fileSize = file.getSize();

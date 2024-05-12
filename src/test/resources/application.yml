@@ -18,6 +18,7 @@ minio:
   secure: false
   bucket: minio-storage
   image-size: 10485760
+  ttlDays: 1
 
 server:
   port: 8080
