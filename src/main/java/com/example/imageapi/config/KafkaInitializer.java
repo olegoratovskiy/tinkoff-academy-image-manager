@@ -1,20 +1,21 @@
 package com.example.imageapi.config;
 
-import com.example.imageapi.kafka.ImagesWipMessage;
-import java.util.Map;
-import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.RoundRobinPartitioner;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 /**
@@ -51,20 +52,34 @@ public class KafkaInitializer {
     }
 
     /**
-     * Create bean for kafka producer.
+     * Create bean for consumers factory.
      *
-     * @return kafka producer
+     * @param <V> value type
+     * @return Consumer factory
      */
     @Bean
-    public KafkaTemplate<String, ImagesWipMessage> kafkaTemplateImagesWip() {
-        return new KafkaTemplate<>(producerFactory(props ->
-            props.put(ProducerConfig.ACKS_CONFIG, "all"))
+    public <V> ConsumerFactory<String, V> consumerFactory() {
+        var props = properties.buildConsumerProperties(null);
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
+        props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
+        props.put(
+            ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,
+            "org.apache.kafka.clients.consumer.RoundRobinAssignor"
         );
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
+            new JsonDeserializer<V>().trustedPackages("*"));
     }
 
-    private <V> ProducerFactory<String, V> producerFactory(
-        final Consumer<Map<String, Object>> enchanter
-    ) {
+    /**
+     * Create bean for producers factory.
+     *
+     * @param <V> value type
+     * @return Producer factory
+     */
+    @Bean
+    public <V> ProducerFactory<String, V> producerFactory() {
         var props = properties.buildProducerProperties(null);
 
         props.put(
@@ -87,8 +102,7 @@ public class KafkaInitializer {
             ProducerConfig.RETRIES_CONFIG,
             Integer.toString(Integer.MAX_VALUE)
         );
-
-        enchanter.accept(props);
+        props.put(ProducerConfig.ACKS_CONFIG, "all");
 
         return new DefaultKafkaProducerFactory<>(props);
     }

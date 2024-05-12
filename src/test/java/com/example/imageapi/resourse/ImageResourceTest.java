@@ -148,7 +148,7 @@ class ImageResourceTest {
     void applyFilters() {
         when(mockImageFiltersService.applyImageFilters(any(), any())).thenReturn("request-id");
         mockMvc.perform(post("/api/v1/image/image-id/filters/apply")
-                .param("filters", "GRAYSCALE"))
+                .param("filters", "SOBEL"))
             .andDo(print()).andExpect(status().isOk())
             .andExpect(content().json(
                 new ObjectMapper().writeValueAsString(new ApplyImageFiltersResponse("request-id"))

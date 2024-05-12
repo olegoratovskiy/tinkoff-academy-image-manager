@@ -3,8 +3,8 @@ package com.example.imageapi.service.filter;
 import com.example.imageapi.domain.ImageFilterRequest;
 import com.example.imageapi.dto.GetModifiedImageByRequestIdResponse;
 import com.example.imageapi.exception.ImageFilterRequestNotFoundException;
-import com.example.imageapi.kafka.ImagesWipMessage;
-import com.example.imageapi.kafka.ImagesWipSender;
+import com.example.imageapi.messagebus.Sender;
+import com.example.imageapi.messagebus.dto.ImagesWipMessage;
 import com.example.imageapi.repository.ImageFilterRequestRepository;
 import com.example.imageapi.service.ImageService;
 import java.util.List;
@@ -21,7 +21,7 @@ public class ImageFiltersService {
 
     private final ImageFilterRequestRepository imageFilterRequestRepository;
     private final ImageService imageService;
-    private final ImagesWipSender imagesWipSender;
+    private final Sender sender;
 
     /**
      * Create request to apply filters to given image.
@@ -39,7 +39,7 @@ public class ImageFiltersService {
                 ImageFilterStatus.WIP,
                 imageId
             ));
-        imagesWipSender.sendMessage(new ImagesWipMessage(
+        sender.sendWip(new ImagesWipMessage(
             imageFilterRequest.getOriginalImageId(),
             imageFilterRequest.getRequestId(),
             imageFilters.stream().map(ImageFilter::toString).toList())

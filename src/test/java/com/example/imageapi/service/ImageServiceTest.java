@@ -18,9 +18,7 @@ import com.example.imageapi.repository.ImageRepository;
 import com.example.imageapi.service.filter.ImageFilterStatus;
 import com.example.imageapi.service.filter.ImageFiltersService;
 import io.minio.ListObjectsArgs;
-import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
-import io.minio.RemoveBucketArgs;
 import io.minio.RemoveObjectArgs;
 import java.util.List;
 import lombok.SneakyThrows;
@@ -125,7 +123,6 @@ class ImageServiceTest {
         user.setRole(User.Role.ROLE_USER);
 
         initUser = userService.create(user);
-        minioClient.makeBucket(MakeBucketArgs.builder().bucket("minio-storage").build());
     }
 
     @AfterEach
@@ -141,7 +138,6 @@ class ImageServiceTest {
                         .build()
                 );
             }
-            minioClient.removeBucket(RemoveBucketArgs.builder().bucket(bucket.name()).build());
         }
     }
 

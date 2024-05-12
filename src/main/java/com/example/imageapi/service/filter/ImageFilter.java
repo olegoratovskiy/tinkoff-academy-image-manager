@@ -4,5 +4,5 @@ package com.example.imageapi.service.filter;
  * Image filters.
  */
 public enum ImageFilter {
-    REVERT_COLORS, GRAYSCALE
+    ADAPTIVE_THRESHOLDING, GAUSSIAN, MAXIMUM, SOBEL
 }

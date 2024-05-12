@@ -24,4 +24,5 @@ public class MinioProperties {
 
     private String bucket;
     private long imageSize;
+    private int ttlDays;
 }
