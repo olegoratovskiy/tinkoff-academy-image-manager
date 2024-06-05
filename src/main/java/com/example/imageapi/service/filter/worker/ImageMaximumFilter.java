@@ -6,10 +6,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import javax.imageio.ImageIO;
+import org.springframework.stereotype.Service;
 
 /**
  * Maximum Filter.
  */
+@Service
 public class ImageMaximumFilter extends AbstractConcurrentFilter {
     private static final int filterSize = 5;
 

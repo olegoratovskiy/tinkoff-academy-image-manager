@@ -44,4 +44,33 @@ token:
   signing:
     key: 53A73E5F1C4E0A2D3B5F2D784E6A1B423D6F247D1F6E5C3A596D635A75327855
 
+imagga:
+  authorization: YWNjXzVkYWUwNmJjMTM4NWQ1MzpjNTRhYzI1NDVhZTA4Mzg0MTI3Yjg1NDNkMmYzNTRhMw==
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 100
+        permittedNumberOfCallsInHalfOpenState: 10
+        slowCallDurationThreshold: 4s
+        slowCallRateThreshold: 90
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        minimumNumberOfCalls: 10
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 100ms
+        retryExceptions:
+          - com.example.imageapi.exception.RetryableException
+  ratelimiter:
+    configs:
+      default:
+        limit-for-period: 3
+        limit-refresh-period: 60s
+        timeout-duration: 0s
+
+
 

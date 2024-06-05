@@ -11,6 +11,7 @@ import com.example.imageapi.exception.NotSupportedFilterException;
 import com.example.imageapi.service.ImageService;
 import com.example.imageapi.service.filter.ImageFilter;
 import com.example.imageapi.service.filter.ImageFiltersService;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -68,6 +69,7 @@ public class ImageResource {
      * @param filters filters
      * @return result image
      */
+    @RateLimiter(name = "ImageApi")
     @PostMapping(value = "/image/{imageId}/filters/apply")
     public ApplyImageFiltersResponse applyImageFilters(
         @PathVariable String imageId,
