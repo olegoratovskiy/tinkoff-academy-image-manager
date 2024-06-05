@@ -1,6 +1,7 @@
 package com.example.imageapi.advice;
 
 import com.example.imageapi.dto.UiSuccessContainer;
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,20 @@ public class BaseExceptionHandler {
     public ResponseEntity<UiSuccessContainer> userNotFound(UsernameNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
             .body(new UiSuccessContainer(false, ex.getMessage()));
+    }
+
+    /**
+     * Handle RateLimiter exception.
+     *
+     * @param ex exception
+     * @return response
+     */
+    @ExceptionHandler({RequestNotPermitted.class})
+    public ResponseEntity<UiSuccessContainer> requestNotPermitted(UsernameNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+            .body(new UiSuccessContainer(false,
+                "You've exceeded the maximum number of request per one minute.")
+            );
     }
 
     @ExceptionHandler({RuntimeException.class})

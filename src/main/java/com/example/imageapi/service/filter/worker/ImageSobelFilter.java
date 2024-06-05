@@ -6,10 +6,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import javax.imageio.ImageIO;
+import org.springframework.stereotype.Service;
 
 /**
  * Sobel Filter.
  */
+@Service
 public class ImageSobelFilter extends AbstractConcurrentFilter {
     private static final int[][] SOBEL_X = {{-1, 0, 1}, {-2, 0, 2}, {-1, 0, 1}};
     private static final int[][] SOBEL_Y = {{-1, -2, -1}, {0, 0, 0}, {1, 2, 1}};

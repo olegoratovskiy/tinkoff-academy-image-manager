@@ -6,10 +6,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import javax.imageio.ImageIO;
+import org.springframework.stereotype.Service;
 
 /**
  * Gaussian Filter.
  */
+@Service
 public class ImageGaussianFilter extends AbstractConcurrentFilter {
     private static final int kernelSize = 5;
     private static final double sigma = 5;

@@ -16,7 +16,7 @@ import com.example.imageapi.service.filter.worker.ImageFilterWorker;
 import com.example.imageapi.service.filter.worker.ImageGaussianFilter;
 import com.example.imageapi.service.filter.worker.ImageMaximumFilter;
 import com.example.imageapi.service.filter.worker.ImageSobelFilter;
-import java.util.Map;
+import com.example.imageapi.service.filter.worker.ImageTagsFilter;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -45,12 +45,11 @@ public class Handler {
 
     private final ImageRepository imageRepository;
 
-    private final Map<ImageFilter, ImageFilterWorker> filterWorkers = Map.of(
-        ImageFilter.ADAPTIVE_THRESHOLDING, new ImageAdaptiveThresholdingFilter(),
-        ImageFilter.GAUSSIAN, new ImageGaussianFilter(),
-        ImageFilter.MAXIMUM, new ImageMaximumFilter(),
-        ImageFilter.SOBEL, new ImageSobelFilter()
-    );
+    private final ImageAdaptiveThresholdingFilter imageAdaptiveThresholdingFilter;
+    private final ImageGaussianFilter imageGaussianFilter;
+    private final ImageMaximumFilter imageMaximumFilter;
+    private final ImageSobelFilter imageSobelFilter;
+    private final ImageTagsFilter imageTagsFilter;
 
     /**
      * Listener for images.done topic.
@@ -102,7 +101,8 @@ public class Handler {
         final ConsumerRecord<String, ImagesWipMessage> record,
         final Acknowledgment acknowledgment
     ) throws Exception {
-        handleWip(record, acknowledgment, ImageFilter.ADAPTIVE_THRESHOLDING);
+        handleWip(record, acknowledgment, ImageFilter.ADAPTIVE_THRESHOLDING,
+            imageAdaptiveThresholdingFilter);
     }
 
     /**
@@ -120,7 +120,7 @@ public class Handler {
         final ConsumerRecord<String, ImagesWipMessage> record,
         final Acknowledgment acknowledgment
     ) throws Exception {
-        handleWip(record, acknowledgment, ImageFilter.GAUSSIAN);
+        handleWip(record, acknowledgment, ImageFilter.GAUSSIAN, imageGaussianFilter);
     }
 
     /**
@@ -138,7 +138,7 @@ public class Handler {
         final ConsumerRecord<String, ImagesWipMessage> record,
         final Acknowledgment acknowledgment
     ) throws Exception {
-        handleWip(record, acknowledgment, ImageFilter.MAXIMUM);
+        handleWip(record, acknowledgment, ImageFilter.MAXIMUM, imageMaximumFilter);
     }
 
     /**
@@ -156,13 +156,32 @@ public class Handler {
         final ConsumerRecord<String, ImagesWipMessage> record,
         final Acknowledgment acknowledgment
     ) throws Exception {
-        handleWip(record, acknowledgment, ImageFilter.SOBEL);
+        handleWip(record, acknowledgment, ImageFilter.SOBEL, imageSobelFilter);
+    }
+
+    /**
+     * Listener for images.wip topic.
+     *
+     * @param record message
+     * @param acknowledgment offset
+     */
+    @KafkaListener(
+        topics = "images.wip",
+        groupId = "consumer-wip-tags",
+        concurrency = "2"
+    )
+    public void handleWipTagsFilter(
+        final ConsumerRecord<String, ImagesWipMessage> record,
+        final Acknowledgment acknowledgment
+    ) throws Exception {
+        handleWip(record, acknowledgment, ImageFilter.TAGS, imageTagsFilter);
     }
 
     private void handleWip(
         final ConsumerRecord<String, ImagesWipMessage> record,
         final Acknowledgment acknowledgment,
-        final ImageFilter acceptedFilter
+        final ImageFilter acceptedFilter,
+        final ImageFilterWorker filter
     ) throws Exception {
         String imageId = record.value().getImageId();
         String requestId = record.value().getRequestId();
@@ -174,8 +193,7 @@ public class Handler {
             return;
         }
 
-        byte[] resultImage = filterWorkers.get(acceptedFilter)
-            .apply(imageStorage.downloadImage(imageId));
+        byte[] resultImage = filter.apply(imageStorage.downloadImage(imageId));
 
         if (record.value().getFilters().size() == 1) {
             String resultImageId = imageStorage.uploadImage(resultImage);

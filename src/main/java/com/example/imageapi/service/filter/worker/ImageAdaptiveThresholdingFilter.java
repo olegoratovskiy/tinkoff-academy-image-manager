@@ -6,10 +6,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import javax.imageio.ImageIO;
+import org.springframework.stereotype.Service;
 
 /**
  * Adaptive Thresholding Filter.
  */
+@Service
 public class ImageAdaptiveThresholdingFilter extends AbstractConcurrentFilter {
 
     private static final int blockSize = 5;
