@@ -96,6 +96,33 @@ services:
     depends_on:
       - zookeeper
 
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus:/etc/prometheus
+    ports:
+      - 9090:9090
+    networks:
+      monitoring:
+        aliases:
+          - prometheus
+    depends_on:
+      - imageapi
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+
 volumes:
   imageapi-db:
   storage-minio:
+
+networks:
+  monitoring:
