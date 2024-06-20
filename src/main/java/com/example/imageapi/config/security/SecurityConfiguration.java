@@ -51,11 +51,12 @@ public class SecurityConfiguration {
             }))
             // Настройка доступа к конечным точкам
             .authorizeHttpRequests(request -> request
-                .requestMatchers("/auth/**").permitAll()
                 .requestMatchers(
+                    "/auth/**",
                     "/swagger-ui/**",
                     "/swagger-resources/*",
-                    "/v3/api-docs/**"
+                    "/v3/api-docs/**",
+                    "/actuator/**"
                 )
                 .permitAll()
                 .anyRequest().authenticated())

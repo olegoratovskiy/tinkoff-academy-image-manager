@@ -12,6 +12,8 @@ import com.example.imageapi.service.ImageService;
 import com.example.imageapi.service.filter.ImageFilter;
 import com.example.imageapi.service.filter.ImageFiltersService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,15 +41,24 @@ public class ImageResource {
     private final ImageFiltersService filtersService;
     private final ImageMapper imageMapper;
 
+    private final Timer uploadImageTimer = Metrics.timer("image-api-upload");
+    private final Timer getImageTimer = Metrics.timer("image-api-get");
+    private final Timer applyFiltersImageTimer = Metrics.timer("image-api-apply-filters");
+
     @PostMapping("/image")
     public UploadImageResponse upload(MultipartFile file) throws Exception {
+        Timer.Sample sample = Timer.start();
         Image image = service.uploadImage(file);
+        sample.stop(uploadImageTimer);
         return new UploadImageResponse(image.getFileId());
     }
 
     @GetMapping(value = "/image/{imageId}")
     public @ResponseBody byte[] get(@PathVariable String imageId) throws Exception {
-        return service.downloadImage(imageId);
+        Timer.Sample sample = Timer.start();
+        byte[] image = service.downloadImage(imageId);
+        sample.stop(getImageTimer);
+        return image;
     }
 
     @DeleteMapping("/image/{imageId}")
@@ -75,6 +86,8 @@ public class ImageResource {
         @PathVariable String imageId,
         @RequestParam List<String> filters
     ) {
+        Timer.Sample sample = Timer.start();
+
         List<ImageFilter> imageFilters = new ArrayList<>();
         for (String filter : filters) {
             try {
@@ -86,8 +99,10 @@ public class ImageResource {
                         .collect(Collectors.joining(", ")));
             }
         }
-        return new ApplyImageFiltersResponse(
+        ApplyImageFiltersResponse result = new ApplyImageFiltersResponse(
             filtersService.applyImageFilters(imageId, imageFilters));
+        sample.stop(applyFiltersImageTimer);
+        return result;
     }
 
     @GetMapping(value = "/image/{imageId}/filters/{requestId}")

@@ -17,6 +17,9 @@ import com.example.imageapi.service.filter.worker.ImageGaussianFilter;
 import com.example.imageapi.service.filter.worker.ImageMaximumFilter;
 import com.example.imageapi.service.filter.worker.ImageSobelFilter;
 import com.example.imageapi.service.filter.worker.ImageTagsFilter;
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +53,12 @@ public class Handler {
     private final ImageMaximumFilter imageMaximumFilter;
     private final ImageSobelFilter imageSobelFilter;
     private final ImageTagsFilter imageTagsFilter;
+
+    private final Timer workerAtTimer = Metrics.timer("worker-at");
+    private final Timer workerGaussianTimer = Metrics.timer("worker-gaussian");
+    private final Timer workerMaximumTimer = Metrics.timer("worker-maximum");
+    private final Timer workerSobelTimer = Metrics.timer("worker-sobel");
+    private final Timer workerTagsTimer = Metrics.timer("worker-tags");
 
     /**
      * Listener for images.done topic.
@@ -101,8 +110,10 @@ public class Handler {
         final ConsumerRecord<String, ImagesWipMessage> record,
         final Acknowledgment acknowledgment
     ) throws Exception {
+        Timer.Sample sample = Timer.start();
         handleWip(record, acknowledgment, ImageFilter.ADAPTIVE_THRESHOLDING,
             imageAdaptiveThresholdingFilter);
+        sample.stop(workerAtTimer);
     }
 
     /**
@@ -120,7 +131,9 @@ public class Handler {
         final ConsumerRecord<String, ImagesWipMessage> record,
         final Acknowledgment acknowledgment
     ) throws Exception {
+        Timer.Sample sample = Timer.start();
         handleWip(record, acknowledgment, ImageFilter.GAUSSIAN, imageGaussianFilter);
+        sample.stop(workerGaussianTimer);
     }
 
     /**
@@ -138,7 +151,9 @@ public class Handler {
         final ConsumerRecord<String, ImagesWipMessage> record,
         final Acknowledgment acknowledgment
     ) throws Exception {
+        Timer.Sample sample = Timer.start();
         handleWip(record, acknowledgment, ImageFilter.MAXIMUM, imageMaximumFilter);
+        sample.stop(workerMaximumTimer);
     }
 
     /**
@@ -156,7 +171,9 @@ public class Handler {
         final ConsumerRecord<String, ImagesWipMessage> record,
         final Acknowledgment acknowledgment
     ) throws Exception {
+        Timer.Sample sample = Timer.start();
         handleWip(record, acknowledgment, ImageFilter.SOBEL, imageSobelFilter);
+        sample.stop(workerSobelTimer);
     }
 
     /**
@@ -174,7 +191,9 @@ public class Handler {
         final ConsumerRecord<String, ImagesWipMessage> record,
         final Acknowledgment acknowledgment
     ) throws Exception {
+        Timer.Sample sample = Timer.start();
         handleWip(record, acknowledgment, ImageFilter.TAGS, imageTagsFilter);
+        sample.stop(workerTagsTimer);
     }
 
     private void handleWip(

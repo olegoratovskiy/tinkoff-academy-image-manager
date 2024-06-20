@@ -72,5 +72,15 @@ resilience4j:
         limit-refresh-period: 60s
         timeout-duration: 0s
 
-
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  observations:
+    annotations:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true

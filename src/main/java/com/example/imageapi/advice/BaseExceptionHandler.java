@@ -2,6 +2,8 @@ package com.example.imageapi.advice;
 
 import com.example.imageapi.dto.UiSuccessContainer;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Metrics;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,8 @@ import org.springframework.web.server.ResponseStatusException;
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class BaseExceptionHandler {
+    private final Counter apiFailureCounter = Metrics.counter("api-failure");
+
     @ExceptionHandler({ResponseStatusException.class})
     public ResponseEntity<UiSuccessContainer> statusException(ResponseStatusException ex) {
         return ResponseEntity.status(ex.getStatusCode())
@@ -44,6 +48,7 @@ public class BaseExceptionHandler {
 
     @ExceptionHandler({RuntimeException.class})
     public ResponseEntity<UiSuccessContainer> exception(RuntimeException ex) {
+        apiFailureCounter.increment();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(new UiSuccessContainer(false, ex.getMessage()));
     }
